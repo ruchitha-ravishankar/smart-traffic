@@ -7,6 +7,7 @@ import openrouteservice
 import overpy
 import os
 from dotenv import load_dotenv
+import threading
 
 load_dotenv()
 
@@ -190,3 +191,43 @@ def get_traffic_signals(origin: str, destination: str):
 
     except Exception as e:
         return {"error": str(e), "signals": []}
+    
+
+def run_simulator():
+    import random
+    import time
+    intersections = ["INT_001", "INT_002", "INT_003", "INT_004"]
+    while True:
+        for intersection_id in intersections:
+            congestion = random.choice(["low", "low", "medium", "medium", "high"])
+            if congestion == "high":
+                vehicle_count = random.randint(51, 80)
+                speed = random.randint(10, 19)
+            elif congestion == "medium":
+                vehicle_count = random.randint(26, 50)
+                speed = random.randint(20, 39)
+            else:
+                vehicle_count = random.randint(0, 25)
+                speed = random.randint(40, 80)
+            data = {
+                "intersection_id": intersection_id,
+                "vehicle_count": vehicle_count,
+                "average_speed_kmh": speed,
+                "congestion": congestion
+            }
+            traffic_data[intersection_id] = data
+            try:
+                conn = sqlite3.connect("traffic.db")
+                cursor = conn.cursor()
+                cursor.execute("""
+                    INSERT INTO traffic_readings (intersection_id, vehicle_count, average_speed_kmh, congestion)
+                    VALUES (?, ?, ?, ?)
+                """, (data["intersection_id"], data["vehicle_count"], data["average_speed_kmh"], data["congestion"]))
+                conn.commit()
+                conn.close()
+            except:
+                pass
+        time.sleep(3)
+
+simulator_thread = threading.Thread(target=run_simulator, daemon=True)
+simulator_thread.start()
