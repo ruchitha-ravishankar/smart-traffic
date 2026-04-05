@@ -28,5 +28,5 @@ while True:
     for intersection in intersections:
         data = generate_data(intersection)
         print(f"Sending: {data}")
-        requests.post("http://localhost:8000/api/traffic/incoming", json=data)
+        requests.post("https://smart-traffic-4nc8.onrender.com/api/traffic/incoming", json=data)
     time.sleep(3)
