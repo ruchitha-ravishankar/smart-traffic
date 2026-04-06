@@ -10,6 +10,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+      - name: Wake up Render
+        run: curl https://smart-traffic-api-lkis.onrender.com/
+      - name: Wait for wake up
+        run: sleep 30
       - name: Set up Python
         uses: actions/setup-python@v4
         with:

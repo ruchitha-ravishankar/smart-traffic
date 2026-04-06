@@ -25,8 +25,6 @@ def generate_data(intersection_id):
         "congestion": congestion
     }
 
-# Run for 4 minutes then stop
-import time
 end_time = time.time() + 240
 
 while time.time() < end_time:
