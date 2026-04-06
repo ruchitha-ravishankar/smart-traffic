@@ -4,6 +4,8 @@ import { MapContainer, TileLayer, Circle, Popup, Polyline, Marker } from "react-
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 
+const API = "https://smart-traffic-api-lkis.onrender.com";
+
 const INTERSECTIONS = {
   INT_001: { lat: 12.9716, lng: 77.5946, name: "MG Road" },
   INT_002: { lat: 12.9784, lng: 77.6408, name: "Indiranagar" },
@@ -93,10 +95,10 @@ function App() {
   useEffect(() => {
     const interval = setInterval(async () => {
       try {
-        const live = await axios.get("http://localhost:8000/api/traffic/live");
-        const hist = await axios.get("http://localhost:8000/api/traffic/history");
-        const emerg = await axios.get("http://localhost:8000/api/emergency");
-        const acc = await axios.get("http://localhost:8000/api/accidents");
+        const live = await axios.get(`${API}/api/traffic/live`);
+        const hist = await axios.get(`${API}/api/traffic/history`);
+        const emerg = await axios.get(`${API}/api/emergency`);
+        const acc = await axios.get(`${API}/api/accidents`);
         setLiveData(live.data);
         setHistory(hist.data.readings);
         setEmergencies(emerg.data.active_emergencies);
@@ -107,11 +109,11 @@ function App() {
   }, []);
 
   const triggerEmergency = async (id) => {
-    await axios.post(`http://localhost:8000/api/emergency/${id}`);
+    await axios.post(`${API}/api/emergency/${id}`);
   };
 
   const clearEmergency = async (id) => {
-    await axios.delete(`http://localhost:8000/api/emergency/${id}`);
+    await axios.delete(`${API}/api/emergency/${id}`);
   };
 
   const findRoute = async () => {
@@ -119,9 +121,9 @@ function App() {
     const destId = NAME_TO_ID[destination];
     if (!originId || !destId) { alert("Please select origin and destination!"); return; }
     setLoading(true);
-    const res = await axios.get(`http://localhost:8000/api/route/${originId}/${destId}`);
+    const res = await axios.get(`${API}/api/route/${originId}/${destId}`);
     setRouteResult(res.data);
-    const sigRes = await axios.get(`http://localhost:8000/api/signals/${originId}/${destId}`);
+    const sigRes = await axios.get(`${API}/api/signals/${originId}/${destId}`);
     setSignals(sigRes.data.signals);
     setLoading(false);
   };
@@ -140,7 +142,6 @@ function App() {
         select option { background: #252d3d; }
       `}</style>
 
-      {/* Header */}
       <div style={styles.header}>
         <div style={styles.headerLeft}>
           <span style={{ fontSize: "28px" }}>🚦</span>
@@ -156,8 +157,6 @@ function App() {
       </div>
 
       <div style={styles.main}>
-
-        {/* Alerts */}
         {emergencies.length > 0 && (
           <div style={styles.alertBanner("#7c3aed")}>
             🚑 EMERGENCY VEHICLE ACTIVE at {emergencies.map(id => INTERSECTIONS[id]?.name).join(", ")} — All signals GREEN!
@@ -174,7 +173,6 @@ function App() {
           </div>
         )}
 
-        {/* Live Traffic Cards */}
         <p style={styles.sectionTitle}>Live Traffic Status</p>
         <div style={styles.statsGrid}>
           {Object.values(liveData).map((item) => {
@@ -201,7 +199,6 @@ function App() {
           })}
         </div>
 
-        {/* Route Finder */}
         <div style={styles.routeBox}>
           <div style={styles.routeTitle}>🗺️ Smart Route Finder</div>
           <div style={styles.routeControls}>
@@ -218,7 +215,6 @@ function App() {
               {loading ? "⏳ Finding..." : "🔍 Find Best Route"}
             </button>
           </div>
-
           {routeResult && !routeResult.error && (
             <div style={styles.routeResult}>
               <div style={styles.routeStats}>
@@ -241,7 +237,6 @@ function App() {
           )}
         </div>
 
-        {/* Map */}
         <div style={styles.mapBox}>
           <div style={styles.mapHeader}>
             <div style={styles.mapTitle}>🗺️ Live Traffic Map — Bengaluru</div>
@@ -291,7 +286,6 @@ function App() {
           </MapContainer>
         </div>
 
-        {/* History Table */}
         <div style={styles.tableBox}>
           <div style={styles.tableHeader}>
             <p style={{ ...styles.sectionTitle, marginBottom: 0 }}>Recent Traffic History</p>
@@ -317,7 +311,6 @@ function App() {
             </tbody>
           </table>
         </div>
-
       </div>
     </div>
   );
