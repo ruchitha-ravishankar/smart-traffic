@@ -4,8 +4,6 @@ import { MapContainer, TileLayer, Circle, Popup, Polyline, Marker } from "react-
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 
-const API = "https://smart-traffic-4nc8.onrender.com";
-
 const INTERSECTIONS = {
   INT_001: { lat: 12.9716, lng: 77.5946, name: "MG Road" },
   INT_002: { lat: 12.9784, lng: 77.6408, name: "Indiranagar" },
@@ -23,18 +21,63 @@ const NAME_TO_ID = {
 const greenIcon = new L.Icon({
   iconUrl: "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-green.png",
   shadowUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png",
-  iconSize: [25, 41],
-  iconAnchor: [12, 41],
-  popupAnchor: [1, -34],
+  iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34],
 });
 
 const redIcon = new L.Icon({
   iconUrl: "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png",
   shadowUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png",
-  iconSize: [25, 41],
-  iconAnchor: [12, 41],
-  popupAnchor: [1, -34],
+  iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34],
 });
+
+const styles = {
+  app: { fontFamily: "'Segoe UI', sans-serif", background: "#0f1117", minHeight: "100vh", color: "#ffffff" },
+  header: { background: "linear-gradient(135deg, #1a1f2e, #252d3d)", padding: "20px 32px", display: "flex", alignItems: "center", justifyContent: "space-between", borderBottom: "1px solid #2d3748", boxShadow: "0 2px 20px rgba(0,0,0,0.3)" },
+  headerLeft: { display: "flex", alignItems: "center", gap: "12px" },
+  headerTitle: { fontSize: "22px", fontWeight: "700", background: "linear-gradient(135deg, #4facfe, #00f2fe)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" },
+  headerSubtitle: { fontSize: "12px", color: "#718096", marginTop: "2px" },
+  liveBadge: { background: "#22c55e", color: "white", padding: "4px 12px", borderRadius: "20px", fontSize: "11px", fontWeight: "600", display: "flex", alignItems: "center", gap: "6px" },
+  liveDot: { width: "6px", height: "6px", background: "white", borderRadius: "50%", animation: "pulse 1.5s infinite" },
+  main: { padding: "24px 32px" },
+  alertBanner: (color) => ({ background: color, color: "white", padding: "14px 20px", borderRadius: "12px", marginBottom: "16px", fontWeight: "600", fontSize: "14px", display: "flex", alignItems: "center", gap: "10px", boxShadow: `0 4px 15px ${color}40` }),
+  sectionTitle: { fontSize: "16px", fontWeight: "600", color: "#a0aec0", marginBottom: "16px", textTransform: "uppercase", letterSpacing: "1px" },
+  statsGrid: { display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "16px", marginBottom: "28px" },
+  statCard: (color) => ({ background: "#1a1f2e", border: `1px solid ${color}40`, borderRadius: "16px", padding: "20px", position: "relative", overflow: "hidden" }),
+  statCardAccent: (color) => ({ position: "absolute", top: 0, left: 0, right: 0, height: "3px", background: color }),
+  statName: { fontSize: "12px", color: "#718096", marginBottom: "8px", fontWeight: "500" },
+  statVehicles: { fontSize: "28px", fontWeight: "700", color: "white", marginBottom: "4px" },
+  statSpeed: { fontSize: "13px", color: "#a0aec0" },
+  statBadge: (color) => ({ display: "inline-block", padding: "3px 10px", borderRadius: "20px", fontSize: "11px", fontWeight: "600", background: `${color}20`, color: color, marginTop: "8px" }),
+  emergencyBtn: (isEmergency) => ({ width: "100%", padding: "8px", borderRadius: "8px", border: "none", cursor: "pointer", fontWeight: "600", fontSize: "12px", marginTop: "12px", background: isEmergency ? "#ef444420" : "#3b82f620", color: isEmergency ? "#ef4444" : "#3b82f6", transition: "all 0.2s" }),
+  routeBox: { background: "#1a1f2e", border: "1px solid #2d3748", borderRadius: "16px", padding: "24px", marginBottom: "28px" },
+  routeTitle: { fontSize: "18px", fontWeight: "700", color: "white", marginBottom: "20px" },
+  routeControls: { display: "flex", gap: "12px", flexWrap: "wrap", alignItems: "center", marginBottom: "16px" },
+  select: { padding: "12px 16px", borderRadius: "10px", border: "1px solid #2d3748", background: "#252d3d", color: "white", fontSize: "14px", outline: "none", minWidth: "160px" },
+  findBtn: { padding: "12px 24px", background: "linear-gradient(135deg, #4facfe, #00f2fe)", color: "#0f1117", border: "none", borderRadius: "10px", cursor: "pointer", fontWeight: "700", fontSize: "14px" },
+  routeResult: { background: "#252d3d", borderRadius: "12px", padding: "16px", marginTop: "16px" },
+  routeStats: { display: "flex", gap: "24px", marginBottom: "16px", flexWrap: "wrap" },
+  routeStat: { fontSize: "14px", color: "#a0aec0" },
+  routeStatValue: { color: "white", fontWeight: "600" },
+  directionItem: { padding: "10px 0", borderBottom: "1px solid #2d3748", fontSize: "13px", color: "#a0aec0", display: "flex", gap: "12px" },
+  directionNum: { color: "#4facfe", fontWeight: "600", minWidth: "24px" },
+  mapBox: { background: "#1a1f2e", border: "1px solid #2d3748", borderRadius: "16px", overflow: "hidden", marginBottom: "28px" },
+  mapHeader: { padding: "16px 20px", borderBottom: "1px solid #2d3748", display: "flex", justifyContent: "space-between", alignItems: "center" },
+  mapTitle: { fontSize: "16px", fontWeight: "600", color: "white" },
+  mapLegend: { display: "flex", gap: "16px", flexWrap: "wrap" },
+  legendItem: (color) => ({ display: "flex", alignItems: "center", gap: "6px", fontSize: "12px", color: "#a0aec0" }),
+  legendDot: (color) => ({ width: "10px", height: "10px", borderRadius: "50%", background: color }),
+  tableBox: { background: "#1a1f2e", border: "1px solid #2d3748", borderRadius: "16px", overflow: "hidden" },
+  tableHeader: { padding: "16px 20px", borderBottom: "1px solid #2d3748" },
+  table: { width: "100%", borderCollapse: "collapse" },
+  th: { padding: "12px 16px", textAlign: "left", fontSize: "11px", color: "#718096", textTransform: "uppercase", letterSpacing: "1px", borderBottom: "1px solid #2d3748" },
+  td: { padding: "12px 16px", fontSize: "13px", color: "#a0aec0", borderBottom: "1px solid #1a1f2e" },
+};
+
+const congestionColor = (level) => {
+  if (level === "high") return "#ef4444";
+  if (level === "medium") return "#f59e0b";
+  return "#22c55e";
+};
 
 function App() {
   const [liveData, setLiveData] = useState({});
@@ -45,292 +88,237 @@ function App() {
   const [destination, setDestination] = useState("");
   const [routeResult, setRouteResult] = useState(null);
   const [signals, setSignals] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const interval = setInterval(async () => {
       try {
-        const live = await axios.get(`${API}/api/traffic/live`);
-        const hist = await axios.get(`${API}/api/traffic/history`);
-        const emerg = await axios.get(`${API}/api/emergency`);
-        const acc = await axios.get(`${API}/api/accidents`);
+        const live = await axios.get("http://localhost:8000/api/traffic/live");
+        const hist = await axios.get("http://localhost:8000/api/traffic/history");
+        const emerg = await axios.get("http://localhost:8000/api/emergency");
+        const acc = await axios.get("http://localhost:8000/api/accidents");
         setLiveData(live.data);
         setHistory(hist.data.readings);
         setEmergencies(emerg.data.active_emergencies);
         setAccidents(acc.data.accidents);
-      } catch (err) {
-        console.log("API error:", err);
-      }
+      } catch (e) {}
     }, 3000);
     return () => clearInterval(interval);
   }, []);
 
-  const congestionColor = (level) => {
-    if (level === "high") return "#ff4444";
-    if (level === "medium") return "#ffaa00";
-    return "#00cc44";
-  };
-
-  const highCongestion = Object.values(liveData).filter(
-    (item) => item.congestion === "high"
-  );
-
   const triggerEmergency = async (id) => {
-    await axios.post(`${API}/api/emergency/${id}`);
+    await axios.post(`http://localhost:8000/api/emergency/${id}`);
   };
 
   const clearEmergency = async (id) => {
-    await axios.delete(`${API}/api/emergency/${id}`);
+    await axios.delete(`http://localhost:8000/api/emergency/${id}`);
   };
 
   const findRoute = async () => {
     const originId = NAME_TO_ID[origin];
     const destId = NAME_TO_ID[destination];
-    if (!originId || !destId) {
-      alert("Please select valid origin and destination!");
-      return;
-    }
-    const res = await axios.get(`${API}/api/route/${originId}/${destId}`);
+    if (!originId || !destId) { alert("Please select origin and destination!"); return; }
+    setLoading(true);
+    const res = await axios.get(`http://localhost:8000/api/route/${originId}/${destId}`);
     setRouteResult(res.data);
-    const sigRes = await axios.get(`${API}/api/signals/${originId}/${destId}`);
+    const sigRes = await axios.get(`http://localhost:8000/api/signals/${originId}/${destId}`);
     setSignals(sigRes.data.signals);
+    setLoading(false);
   };
 
   const routeCoords = routeResult?.geometry
     ? routeResult.geometry.map(([lng, lat]) => [lat, lng])
     : null;
 
+  const highCongestion = Object.values(liveData).filter(i => i.congestion === "high");
+
   return (
-    <div style={{ padding: "20px", fontFamily: "Arial" }}>
-      <h1>🚦 Smart Traffic Dashboard — Bengaluru</h1>
+    <div style={styles.app}>
+      <style>{`
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        select option { background: #252d3d; }
+      `}</style>
 
-      {emergencies.length > 0 && (
-        <div style={{
-          background: "#7b2ff7", color: "white",
-          padding: "12px 20px", borderRadius: "8px",
-          marginBottom: "16px", fontWeight: "bold", fontSize: "16px"
-        }}>
-          🚑 EMERGENCY VEHICLE ACTIVE at{" "}
-          {emergencies.map(id => INTERSECTIONS[id]?.name).join(", ")}
-          — All signals GREEN!
+      {/* Header */}
+      <div style={styles.header}>
+        <div style={styles.headerLeft}>
+          <span style={{ fontSize: "28px" }}>🚦</span>
+          <div>
+            <div style={styles.headerTitle}>Smart Traffic Management System</div>
+            <div style={styles.headerSubtitle}>Bengaluru Urban Traffic Control Center</div>
+          </div>
         </div>
-      )}
-
-      {accidents.length > 0 && (
-        <div style={{
-          background: "#ff6600", color: "white",
-          padding: "12px 20px", borderRadius: "8px",
-          marginBottom: "16px", fontWeight: "bold", fontSize: "16px"
-        }}>
-          🚧 ACCIDENT DETECTED at{" "}
-          {accidents.map(a => INTERSECTIONS[a.intersection]?.name).join(", ")}!
-          — Caution advised!
+        <div style={styles.liveBadge}>
+          <div style={styles.liveDot}></div>
+          LIVE
         </div>
-      )}
+      </div>
 
-      {highCongestion.length > 0 && (
-        <div style={{
-          background: "#ff4444", color: "white",
-          padding: "12px 20px", borderRadius: "8px",
-          marginBottom: "16px", fontWeight: "bold", fontSize: "16px"
-        }}>
-          🚨 ALERT: High congestion at{" "}
-          {highCongestion.map(i => INTERSECTIONS[i.intersection_id]?.name).join(", ")}!
-        </div>
-      )}
+      <div style={styles.main}>
 
-      <div style={{
-        background: "#f8f8f8", padding: "20px",
-        borderRadius: "12px", marginBottom: "24px",
-        border: "1px solid #ddd"
-      }}>
-        <h2 style={{ marginTop: 0 }}>🗺️ Smart Route Finder</h2>
-        <div style={{ display: "flex", gap: "12px", flexWrap: "wrap", alignItems: "center" }}>
-          <select
-            value={origin}
-            onChange={e => setOrigin(e.target.value)}
-            style={{ padding: "10px", borderRadius: "8px", border: "1px solid #ddd", fontSize: "14px" }}
-          >
-            <option value="">Select Origin</option>
-            {Object.keys(NAME_TO_ID).map(name => (
-              <option key={name} value={name}>{name}</option>
-            ))}
-          </select>
-          <span style={{ fontSize: "20px" }}>→</span>
-          <select
-            value={destination}
-            onChange={e => setDestination(e.target.value)}
-            style={{ padding: "10px", borderRadius: "8px", border: "1px solid #ddd", fontSize: "14px" }}
-          >
-            <option value="">Select Destination</option>
-            {Object.keys(NAME_TO_ID).map(name => (
-              <option key={name} value={name}>{name}</option>
-            ))}
-          </select>
-          <button
-            onClick={findRoute}
-            style={{
-              padding: "10px 20px", background: "#0066ff",
-              color: "white", border: "none", borderRadius: "8px",
-              cursor: "pointer", fontWeight: "bold", fontSize: "14px"
-            }}
-          >
-            🔍 Find Best Route
-          </button>
-        </div>
-
-        {routeResult && !routeResult.error && (
-          <div style={{ marginTop: "16px" }}>
-            <div style={{
-              padding: "12px", borderRadius: "8px",
-              background: "#f0fff0", border: "1px solid #ccffcc",
-              marginBottom: "8px"
-            }}>
-              <p><b>⭐ Best Route:</b> {origin} → {destination}</p>
-              <p>📏 Distance: {routeResult.distance_km} km</p>
-              <p>⏱️ Duration: {routeResult.duration_minutes} minutes</p>
-              <p>🚦 Traffic signals on route: {signals.length}</p>
-              {routeResult.blocked_intersections.length > 0 && (
-                <p style={{ color: "#cc0000" }}>⚠️ Avoiding: {routeResult.blocked_intersections.map(id => INTERSECTIONS[id]?.name).join(", ")}</p>
-              )}
-            </div>
-            <h3>Turn by turn directions:</h3>
-            {routeResult.instructions.map((step, i) => (
-              <div key={i} style={{
-                padding: "8px 12px", borderBottom: "1px solid #eee",
-                fontSize: "14px"
-              }}>
-                {i + 1}. {step}
-              </div>
-            ))}
+        {/* Alerts */}
+        {emergencies.length > 0 && (
+          <div style={styles.alertBanner("#7c3aed")}>
+            🚑 EMERGENCY VEHICLE ACTIVE at {emergencies.map(id => INTERSECTIONS[id]?.name).join(", ")} — All signals GREEN!
           </div>
         )}
-      </div>
+        {accidents.length > 0 && (
+          <div style={styles.alertBanner("#ea580c")}>
+            🚧 ACCIDENT DETECTED at {accidents.map(a => INTERSECTIONS[a.intersection]?.name).join(", ")} — Caution advised!
+          </div>
+        )}
+        {highCongestion.length > 0 && (
+          <div style={styles.alertBanner("#dc2626")}>
+            🚨 HIGH CONGESTION at {highCongestion.map(i => INTERSECTIONS[i.intersection_id]?.name).join(", ")}
+          </div>
+        )}
 
-      <h2>Live Map</h2>
-      <MapContainer
-        center={[12.9716, 77.5946]}
-        zoom={12}
-        style={{ height: "400px", borderRadius: "12px", marginBottom: "24px" }}
-      >
-        <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-        {Object.values(liveData).map((item) => {
-          const location = INTERSECTIONS[item.intersection_id];
-          if (!location) return null;
-          const isEmergency = emergencies.includes(item.intersection_id);
-          const isAccident = accidents.some(a => a.intersection === item.intersection_id);
-          return (
-            <Circle
-              key={item.intersection_id}
-              center={[location.lat, location.lng]}
-              radius={300}
-              color={isEmergency ? "#7b2ff7" : isAccident ? "#ff6600" : congestionColor(item.congestion)}
-              fillColor={isEmergency ? "#7b2ff7" : isAccident ? "#ff6600" : congestionColor(item.congestion)}
-              fillOpacity={0.6}
-            >
-              <Popup>
-                <b>{location.name}</b><br />
-                {isEmergency && <b>🚑 EMERGENCY MODE<br /></b>}
-                {isAccident && <b>🚧 ACCIDENT REPORTED<br /></b>}
-                🚗 {item.vehicle_count} vehicles<br />
-                ⚡ {item.average_speed_kmh} km/h<br />
-                ⚠️ {item.congestion} congestion
-              </Popup>
-            </Circle>
-          );
-        })}
-        {routeCoords && (
-          <Polyline positions={routeCoords} color="#0066ff" weight={5} />
-        )}
-        {signals.map((signal) => (
-          <Circle
-            key={signal.id}
-            center={[signal.lat, signal.lng]}
-            radius={30}
-            color="#FFD700"
-            fillColor="#FFD700"
-            fillOpacity={1}
-          >
-            <Popup>🚦 Traffic Signal</Popup>
-          </Circle>
-        ))}
-        {routeCoords && NAME_TO_ID[origin] && (
-          <Marker
-            position={[INTERSECTIONS[NAME_TO_ID[origin]].lat, INTERSECTIONS[NAME_TO_ID[origin]].lng]}
-            icon={greenIcon}
-          >
-            <Popup>🟢 Start: {origin}</Popup>
-          </Marker>
-        )}
-        {routeCoords && NAME_TO_ID[destination] && (
-          <Marker
-            position={[INTERSECTIONS[NAME_TO_ID[destination]].lat, INTERSECTIONS[NAME_TO_ID[destination]].lng]}
-            icon={redIcon}
-          >
-            <Popup>🔴 End: {destination}</Popup>
-          </Marker>
-        )}
-      </MapContainer>
+        {/* Live Traffic Cards */}
+        <p style={styles.sectionTitle}>Live Traffic Status</p>
+        <div style={styles.statsGrid}>
+          {Object.values(liveData).map((item) => {
+            const isEmergency = emergencies.includes(item.intersection_id);
+            const isAccident = accidents.some(a => a.intersection === item.intersection_id);
+            const color = isEmergency ? "#7c3aed" : isAccident ? "#ea580c" : congestionColor(item.congestion);
+            return (
+              <div key={item.intersection_id} style={styles.statCard(color)}>
+                <div style={styles.statCardAccent(color)}></div>
+                <div style={styles.statName}>{INTERSECTIONS[item.intersection_id]?.name}</div>
+                <div style={styles.statVehicles}>{item.vehicle_count}</div>
+                <div style={styles.statSpeed}>⚡ {item.average_speed_kmh} km/h</div>
+                <div style={styles.statBadge(color)}>
+                  {isEmergency ? "🚑 Emergency" : isAccident ? "🚧 Accident" : item.congestion.toUpperCase()}
+                </div>
+                <button
+                  style={styles.emergencyBtn(isEmergency)}
+                  onClick={() => isEmergency ? clearEmergency(item.intersection_id) : triggerEmergency(item.intersection_id)}
+                >
+                  {isEmergency ? "✅ Clear Emergency" : "🚑 Trigger Emergency"}
+                </button>
+              </div>
+            );
+          })}
+        </div>
 
-      <h2>Live Traffic</h2>
-      <div style={{ display: "flex", gap: "16px", flexWrap: "wrap", marginBottom: "24px" }}>
-        {Object.values(liveData).map((item) => {
-          const isEmergency = emergencies.includes(item.intersection_id);
-          const isAccident = accidents.some(a => a.intersection === item.intersection_id);
-          return (
-            <div key={item.intersection_id} style={{
-              background: isEmergency ? "#7b2ff7" : isAccident ? "#ff6600" : congestionColor(item.congestion),
-              padding: "20px", borderRadius: "12px",
-              color: "white", minWidth: "160px"
-            }}>
-              <h3>{INTERSECTIONS[item.intersection_id]?.name}</h3>
-              {isEmergency && <p>🚑 EMERGENCY MODE</p>}
-              {isAccident && <p>🚧 ACCIDENT REPORTED</p>}
-              <p>🚗 {item.vehicle_count} vehicles</p>
-              <p>⚡ {item.average_speed_kmh} km/h</p>
-              <p>⚠️ {item.congestion}</p>
-              {isEmergency ? (
-                <button onClick={() => clearEmergency(item.intersection_id)} style={{
-                  background: "white", color: "#7b2ff7",
-                  border: "none", padding: "8px 12px",
-                  borderRadius: "6px", cursor: "pointer",
-                  fontWeight: "bold", width: "100%"
-                }}>✅ Clear Emergency</button>
-              ) : (
-                <button onClick={() => triggerEmergency(item.intersection_id)} style={{
-                  background: "white", color: "#333",
-                  border: "none", padding: "8px 12px",
-                  borderRadius: "6px", cursor: "pointer",
-                  fontWeight: "bold", width: "100%"
-                }}>🚑 Emergency</button>
-              )}
+        {/* Route Finder */}
+        <div style={styles.routeBox}>
+          <div style={styles.routeTitle}>🗺️ Smart Route Finder</div>
+          <div style={styles.routeControls}>
+            <select value={origin} onChange={e => setOrigin(e.target.value)} style={styles.select}>
+              <option value="">📍 Select Origin</option>
+              {Object.keys(NAME_TO_ID).map(n => <option key={n} value={n}>{n}</option>)}
+            </select>
+            <span style={{ color: "#4facfe", fontSize: "20px" }}>→</span>
+            <select value={destination} onChange={e => setDestination(e.target.value)} style={styles.select}>
+              <option value="">🏁 Select Destination</option>
+              {Object.keys(NAME_TO_ID).map(n => <option key={n} value={n}>{n}</option>)}
+            </select>
+            <button onClick={findRoute} style={styles.findBtn} disabled={loading}>
+              {loading ? "⏳ Finding..." : "🔍 Find Best Route"}
+            </button>
+          </div>
+
+          {routeResult && !routeResult.error && (
+            <div style={styles.routeResult}>
+              <div style={styles.routeStats}>
+                <div style={styles.routeStat}>📏 Distance: <span style={styles.routeStatValue}>{routeResult.distance_km} km</span></div>
+                <div style={styles.routeStat}>⏱️ Duration: <span style={styles.routeStatValue}>{routeResult.duration_minutes} mins</span></div>
+                <div style={styles.routeStat}>🚦 Signals: <span style={styles.routeStatValue}>{signals.length}</span></div>
+                {routeResult.blocked_intersections.length > 0 && (
+                  <div style={styles.routeStat}>⚠️ Avoiding: <span style={{ color: "#ef4444", fontWeight: "600" }}>{routeResult.blocked_intersections.map(id => INTERSECTIONS[id]?.name).join(", ")}</span></div>
+                )}
+              </div>
+              <div>
+                {routeResult.instructions.map((step, i) => (
+                  <div key={i} style={styles.directionItem}>
+                    <span style={styles.directionNum}>{i + 1}</span>
+                    <span>{step}</span>
+                  </div>
+                ))}
+              </div>
             </div>
-          );
-        })}
-      </div>
+          )}
+        </div>
 
-      <h2>Recent History</h2>
-      <table style={{ width: "100%", borderCollapse: "collapse" }}>
-        <thead>
-          <tr style={{ background: "#f0f0f0" }}>
-            <th style={{ padding: "8px", textAlign: "left" }}>Intersection</th>
-            <th style={{ padding: "8px", textAlign: "left" }}>Vehicles</th>
-            <th style={{ padding: "8px", textAlign: "left" }}>Speed</th>
-            <th style={{ padding: "8px", textAlign: "left" }}>Congestion</th>
-            <th style={{ padding: "8px", textAlign: "left" }}>Time</th>
-          </tr>
-        </thead>
-        <tbody>
-          {history.map((row, i) => (
-            <tr key={i} style={{ borderBottom: "1px solid #ddd" }}>
-              <td style={{ padding: "8px" }}>{INTERSECTIONS[row[1]]?.name}</td>
-              <td style={{ padding: "8px" }}>{row[2]}</td>
-              <td style={{ padding: "8px" }}>{row[3]}</td>
-              <td style={{ padding: "8px", color: congestionColor(row[4]) }}>{row[4]}</td>
-              <td style={{ padding: "8px" }}>{row[5]}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+        {/* Map */}
+        <div style={styles.mapBox}>
+          <div style={styles.mapHeader}>
+            <div style={styles.mapTitle}>🗺️ Live Traffic Map — Bengaluru</div>
+            <div style={styles.mapLegend}>
+              {[["#22c55e","Low"],["#f59e0b","Medium"],["#ef4444","High"],["#7c3aed","Emergency"],["#ea580c","Accident"],["#FFD700","Signal"]].map(([c,l]) => (
+                <div key={l} style={styles.legendItem(c)}>
+                  <div style={styles.legendDot(c)}></div>{l}
+                </div>
+              ))}
+            </div>
+          </div>
+          <MapContainer center={[12.9716, 77.5946]} zoom={12} style={{ height: "450px" }}>
+            <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+            {Object.values(liveData).map((item) => {
+              const location = INTERSECTIONS[item.intersection_id];
+              if (!location) return null;
+              const isEmergency = emergencies.includes(item.intersection_id);
+              const isAccident = accidents.some(a => a.intersection === item.intersection_id);
+              const color = isEmergency ? "#7c3aed" : isAccident ? "#ea580c" : congestionColor(item.congestion);
+              return (
+                <Circle key={item.intersection_id} center={[location.lat, location.lng]} radius={300} color={color} fillColor={color} fillOpacity={0.6}>
+                  <Popup>
+                    <b>{location.name}</b><br />
+                    🚗 {item.vehicle_count} vehicles<br />
+                    ⚡ {item.average_speed_kmh} km/h<br />
+                    ⚠️ {item.congestion}
+                  </Popup>
+                </Circle>
+              );
+            })}
+            {routeCoords && <Polyline positions={routeCoords} color="#4facfe" weight={5} />}
+            {signals.map(s => (
+              <Circle key={s.id} center={[s.lat, s.lng]} radius={30} color="#FFD700" fillColor="#FFD700" fillOpacity={1}>
+                <Popup>🚦 Traffic Signal</Popup>
+              </Circle>
+            ))}
+            {routeCoords && NAME_TO_ID[origin] && (
+              <Marker position={[INTERSECTIONS[NAME_TO_ID[origin]].lat, INTERSECTIONS[NAME_TO_ID[origin]].lng]} icon={greenIcon}>
+                <Popup>🟢 Start: {origin}</Popup>
+              </Marker>
+            )}
+            {routeCoords && NAME_TO_ID[destination] && (
+              <Marker position={[INTERSECTIONS[NAME_TO_ID[destination]].lat, INTERSECTIONS[NAME_TO_ID[destination]].lng]} icon={redIcon}>
+                <Popup>🔴 End: {destination}</Popup>
+              </Marker>
+            )}
+          </MapContainer>
+        </div>
+
+        {/* History Table */}
+        <div style={styles.tableBox}>
+          <div style={styles.tableHeader}>
+            <p style={{ ...styles.sectionTitle, marginBottom: 0 }}>Recent Traffic History</p>
+          </div>
+          <table style={styles.table}>
+            <thead>
+              <tr>
+                {["Intersection", "Vehicles", "Speed", "Congestion", "Timestamp"].map(h => (
+                  <th key={h} style={styles.th}>{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {history.map((row, i) => (
+                <tr key={i}>
+                  <td style={styles.td}>{INTERSECTIONS[row[1]]?.name}</td>
+                  <td style={styles.td}>{row[2]}</td>
+                  <td style={styles.td}>{row[3]} km/h</td>
+                  <td style={{ ...styles.td, color: congestionColor(row[4]), fontWeight: "600" }}>{row[4]?.toUpperCase()}</td>
+                  <td style={styles.td}>{row[5]}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+      </div>
     </div>
   );
 }
