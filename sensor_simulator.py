@@ -26,13 +26,17 @@ def generate_data(intersection_id):
     }
 
 end_time = time.time() + 150
-
 while time.time() < end_time:
     for intersection in intersections:
         data = generate_data(intersection)
         print(f"Sending: {data}")
         try:
-            requests.post(f"{API_URL}/api/traffic/incoming", json=data)
+            response = requests.post(
+                f"{API_URL}/api/traffic/incoming",
+                json=data,
+                timeout=10
+            )
+            print(f"Response: {response.status_code}")
         except Exception as e:
             print(f"Error: {e}")
     time.sleep(3)

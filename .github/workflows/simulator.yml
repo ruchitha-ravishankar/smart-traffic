@@ -9,13 +9,13 @@ jobs:
   simulate:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Wake up Render
-        run: curl https://smart-traffic-api-lkis.onrender.com/
-      - name: Wait for wake up
-        run: sleep 30
+        run: |
+          curl -s https://smart-traffic-api-lkis.onrender.com/ || true
+          sleep 60
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: "3.11"
       - name: Install dependencies
