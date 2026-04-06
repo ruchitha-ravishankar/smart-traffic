@@ -25,7 +25,7 @@ def generate_data(intersection_id):
         "congestion": congestion
     }
 
-end_time = time.time() + 240
+end_time = time.time() + 150
 
 while time.time() < end_time:
     for intersection in intersections:

@@ -22,6 +22,6 @@ jobs:
         run: pip install requests
       - name: Run simulator
         run: python sensor_simulator.py
-        timeout-minutes: 4
+        timeout-minutes: 3
         env:
           API_URL: https://smart-traffic-api-lkis.onrender.com
