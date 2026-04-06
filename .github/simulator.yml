@@ -1,0 +1,23 @@
+name: Traffic Simulator
+
+on:
+  schedule:
+    - cron: "*/5 * * * *"
+  workflow_dispatch:
+
+jobs:
+  simulate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+      - name: Install dependencies
+        run: pip install requests
+      - name: Run simulator
+        run: python sensor_simulator.py
+        timeout-minutes: 4
+        env:
+          API_URL: https://smart-traffic-api-lkis.onrender.com
